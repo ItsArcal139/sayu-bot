@@ -144,6 +144,11 @@ export class SayuBot extends EventEmitter {
                 description: `讓${nickName}起床工作...zzZ`,
                 options: [
                     {
+                        name: "help",
+                        description: `${nickName}要讓你更加認識我！！`,
+                        type: "SUB_COMMAND"
+                    },
+                    {
                         name: "play",
                         description: `${nickName}要來當 DJ！`,
                         type: "SUB_COMMAND",
@@ -346,6 +351,11 @@ export class SayuBot extends EventEmitter {
 
             sub = options.getSubcommand();
 
+            if(sub == "help") {
+                await this.executeHelp(interaction);
+                return;
+            }
+
             if(sub == "play") {
                 await this.executePlay(interaction);
                 return;
@@ -408,6 +418,16 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `${this.config.nickname}覺得不能幫你做這種事...zzZ`
+                })
+            ]
+        });
+    }
+
+    public async executeHelp(interaction: CommandInteraction) {
+        interaction.reply({
+            embeds: [
+                this.getExtendedEmbed({
+                    description: `${this.config.nickname}要讓你更認識我！！[快過去看看！！](https://github.com/ItsArcal139/sayu-bot/blob/master/docs/help.md)`
                 })
             ]
         });
