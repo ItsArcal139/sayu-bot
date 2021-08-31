@@ -1,0 +1,10 @@
+{
+    "token": "<token>",
+    "nickname": "早柚",
+    "commandName": "sayu",
+    "status": "idle",
+    "activity": {
+        "name": "大家睡覺..zzZ",
+        "type": "WATCHING"
+    }
+}

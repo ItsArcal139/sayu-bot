@@ -1,0 +1,7 @@
+# Build environment
+build
+guilds
+node_modules
+
+# Configuration file should be leave automatically generated.
+config.json
