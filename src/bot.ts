@@ -27,7 +27,7 @@ export class SayuBot extends EventEmitter {
         SayuBot.instance = this;
         this.config = new BotConfig();
         this.api = new Client({
-            intents: [ "GUILDS", "GUILD_VOICE_STATES", "GUILD_MEMBERS" ],
+            intents: [ "GUILDS", "GUILD_VOICE_STATES", "GUILD_MEMBERS", "GUILD_MESSAGES" ],
             partials: ["MESSAGE", "CHANNEL"]
         });
 
@@ -51,7 +51,7 @@ export class SayuBot extends EventEmitter {
             await this.registerSlashCommands();
         });
 
-        this.api.on("message", (msg: Message) => {
+        this.api.on("messageCreate", (msg: Message) => {
             if(msg.channel instanceof DMChannel && msg.author.id != this.api.user?.id) {
                 Logger.info(msg.author.tag + ": " + msg.content);
             }
