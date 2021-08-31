@@ -51,7 +51,7 @@ export class KaboomManager {
             }
         })();
 
-        this.bot.api.on("message", this.handleMessage);
+        this.bot.api.on("message", this.messageHandler);
     }
 
     private async handleMessage(msg: Message) {
