@@ -3,6 +3,7 @@ import { SayuGuildManager } from "../guildManager";
 import ytdl from "ytdl-core";
 import { EventEmitter } from "events";
 import { PromiseTimer } from "../utils/timeprom";
+import { Logger } from "../utils/logger";
 
 export class PlayerManager extends EventEmitter {
     private guildManager: SayuGuildManager;
@@ -31,11 +32,17 @@ export class PlayerManager extends EventEmitter {
         this.reset();
     }
 
-    public getExtendedEmbed(embed: MessageEmbedOptions): MessageEmbedOptions {
-        return this.guildManager.bot.getExtendedEmbed({
-            author: undefined,
-            ...embed
-        });
+    public getExtendedEmbed(embed: MessageEmbedOptions, removeAuthor = true): MessageEmbedOptions {
+        if(removeAuthor) {
+            return this.guildManager.bot.getExtendedEmbed({
+                author: undefined,
+                ...embed
+            });
+        } else {
+            return this.guildManager.bot.getExtendedEmbed({
+                ...embed
+            });
+        }
     }
 
     public getNextIndex() {
@@ -58,14 +65,6 @@ export class PlayerManager extends EventEmitter {
 
     public skip() {
         this.voiceController.forceStop();
-        this.skipped = true;
-    }
-
-    private async waitForSkip() {
-        while(!this.skipped) {
-            await PromiseTimer.timeout(16);
-        }
-        this.skipped = false;
     }
 
     private async playLast() {
@@ -73,13 +72,13 @@ export class PlayerManager extends EventEmitter {
         await this.play();
     }
 
-    private async sendToLastTextChannel(embed: MessageEmbedOptions, asLastPlaying = true) {
+    private async sendToLastTextChannel(embed: MessageEmbedOptions, removeAuthor = true, asLastPlaying = true) {
         const channel = this.guildManager.guild.channels.cache.get(this.guildManager.config.data.player.lastTextChannel);
         if(channel instanceof TextChannel) {
             // Sends playing embed.
             const r = await channel.send({
                 embeds: [
-                    this.getExtendedEmbed(embed)
+                    this.getExtendedEmbed(embed, removeAuthor)
                 ]
             });
 
@@ -91,6 +90,11 @@ export class PlayerManager extends EventEmitter {
     }
 
     private async play() {
+        if(this.isPlaying) {
+            Logger.warn("play() called when playing");
+            return;
+        }
+
         const vc = this.voiceController;
         const queue = this.queue.items[this.currentIndex];
         if(!queue) {
@@ -118,14 +122,10 @@ export class PlayerManager extends EventEmitter {
                         value: `[${queue.meta.title}](${queue.meta.url}) [<@${queue.member.id}>]`
                     }
                 ]
-            }, false);
+            }, false, false);
         });
 
-        await Promise.race([
-            vc.waitForEnded(),
-            this.waitForSkip()
-        ]);
-
+        await vc.waitForEnded();
         this.removeLastPlayingMessage();
         this.isPlaying = false;
         this.playNextIfNotPlaying();
@@ -202,7 +202,6 @@ export class PlayerManager extends EventEmitter {
     public jumpTo(index: number) {
         this.jumpTarget = index;
         this.skip();
-        this.playNextIfNotPlaying();
     }
 
     public clearQueue() {
