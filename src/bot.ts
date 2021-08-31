@@ -390,6 +390,11 @@ export class SayuBot extends EventEmitter {
                 await this.executeClear(interaction);
                 return;
             }
+
+            if(sub == "remove") {
+                await this.executeRemove(interaction);
+                return;
+            }
         }
     }
 
