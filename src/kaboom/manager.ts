@@ -1,7 +1,7 @@
 import { SayuBot } from "../bot";
 import * as cron from "node-cron";
 import { Logger } from "../utils/logger";
-import { EmbedField, Guild, GuildMember, Interaction, MessageEmbed, MessageEmbedOptions, NewsChannel, OverwriteResolvable, PermissionString, TextChannel } from "discord.js";
+import { DMChannel, EmbedField, Guild, GuildMember, Interaction, Message, MessageEmbed, MessageEmbedOptions, NewsChannel, OverwriteResolvable, PermissionString, TextChannel, ThreadChannel } from "discord.js";
 import { SayuGuildManager } from "../guildManager";
 import { OnDutyProvider, ProviderBase, TestProvider } from "./providers";
 import * as util from "util";
@@ -16,6 +16,10 @@ export class KaboomManager {
     private interactionHandler = async (interaction: Interaction) => {
         await this.handleInteraction(interaction);
     };
+
+    private messageHandler = async (message: Message) => {
+        await this.handleMessage(message);
+    }
 
     public get bot() {
         return this.guildManager.bot;
@@ -46,6 +50,28 @@ export class KaboomManager {
                 Logger.warn("Failed to fetch the guild members!!");
             }
         })();
+
+        this.bot.api.on("message", this.handleMessage);
+    }
+
+    private async handleMessage(msg: Message) {
+        if(!this.config.enabled) return;
+        if(msg.author.id == this.bot.api.user?.id) return;
+        if(msg.channel instanceof DMChannel) return;
+        if(!(msg.channel instanceof TextChannel) && !(msg.channel instanceof NewsChannel)) return;
+        if(msg.member?.roles.cache.map(r => r.id).indexOf(this.config.forceKickRole) == -1) return;
+
+        if(this.config.validChannels.indexOf(msg.channel.id) == -1) {
+            Logger.info(`Force kick pending member ${msg.author.tag} is sending messages to ignored channel ${msg.channel.name} (#${msg.channel.id})`);
+            return;
+        }
+
+        if(this.config.lockedForceKickMembers.indexOf(msg.author.id) == -1) {
+            this.provider.removeRole(msg.member!!, this.config.forceKickRole);
+            Logger.info(`Removed force kick role from ${msg.author.tag}`);
+        } else {
+            Logger.info(`Cannot remove force kick role from ${msg.author.tag} because they are banned from doing this.`);
+        }
     }
 
     public dispose() {
@@ -312,6 +338,8 @@ export class KaboomManager {
     }
 
     public async execute() {
+        if(!this.config.enabled) return;
+
         Logger.info("Started to compact inactive members...");
         if(KaboomManager.debugTest) {
             Logger.info("-- Debug mode is activated. That means the bot should not perform any real actions. --");
@@ -357,6 +385,7 @@ export class KaboomManager {
 
             const roles = m.roles.cache.map(r => r.id);
             if(roles.indexOf(this.config.forceKickRole) != -1) {
+                // Force kick role exists, so we kick the member.
                 toKick = true;
             }
 
@@ -408,7 +437,6 @@ export class KaboomManager {
                 value: "[連結](https://discord.gg/pWPNVqXRGy)",
                 inline: false
             });
-
             embed = this.bot.getExtendedEmbed(embed, this.guild);
             
             this.provider.sendToMember(m, { embeds: [ embed ] }).finally(() => {
@@ -438,6 +466,8 @@ export class KaboomManager {
                 value: `${kicked}人`,
                 inline: true
             });
+            embed = this.bot.getExtendedEmbed(embed, this.guild);
+
             this.provider.sendToChannel(c, { embeds: [ embed ] });
         }
     }
