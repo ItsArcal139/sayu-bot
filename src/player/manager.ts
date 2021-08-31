@@ -37,11 +37,11 @@ export class PlayerManager extends EventEmitter {
             return this.guildManager.bot.getExtendedEmbed({
                 author: undefined,
                 ...embed
-            });
+            }, this.guildManager.guild);
         } else {
             return this.guildManager.bot.getExtendedEmbed({
                 ...embed
-            });
+            }, this.guildManager.guild);
         }
     }
 

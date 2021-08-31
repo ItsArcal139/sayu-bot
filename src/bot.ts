@@ -95,7 +95,7 @@ export class SayuBot extends EventEmitter {
                                 fields: [
                                     { name: "錯誤訊息", value: "`" + ex.toString() + "`" }
                                 ]
-                            })
+                            }, interaction.guild)
                         ]
                     });
                 }
@@ -408,7 +408,10 @@ export class SayuBot extends EventEmitter {
         }
     }
 
-    public getGuildManager(guild: Guild): SayuGuildManager | undefined {
+    public getGuildManager(guild: Guild): SayuGuildManager | undefined
+    public getGuildManager(guild: null): undefined
+    public getGuildManager(guild: Guild | null): SayuGuildManager | undefined {
+        if(!guild) return undefined;
         return this.guildManagers.find(m => m.guild.id == guild.id);
     }
 
@@ -418,7 +421,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `${this.config.nickname}覺得不能幫你做這種事...zzZ`
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -428,7 +431,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `${this.config.nickname}要讓你更認識我！！[快過去看看！！](https://github.com/ItsArcal139/sayu-bot/blob/master/docs/help.md)`
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -453,7 +456,7 @@ export class SayuBot extends EventEmitter {
                 embeds: [
                     this.getExtendedEmbed({
                         description: "取消現有的潛水檢查了...zzZ"
-                    })
+                    }, interaction.guild)
                 ]
             });
             return;
@@ -466,7 +469,7 @@ export class SayuBot extends EventEmitter {
                 embeds: [
                     this.getExtendedEmbed({
                         description: "已經更正現有的潛水檢查訊息了...zzZ"
-                    })
+                    }, interaction.guild)
                 ]
             });
             return;
@@ -483,7 +486,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: "設定好新的潛水檢查了...zzZ"
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -497,7 +500,7 @@ export class SayuBot extends EventEmitter {
                 embeds: [
                     this.getExtendedEmbed({
                         description: `${this.config.nickname}發現你沒在語音頻道內，覺得不想做事（躺`
-                    })
+                    }, interaction.guild)
                 ]
             });
             return false;
@@ -509,7 +512,7 @@ export class SayuBot extends EventEmitter {
                 embeds: [
                     this.getExtendedEmbed({
                         description: `你需要和${this.config.nickname}在同個頻道才可以用這個指令！`
-                    })
+                    }, interaction.guild)
                 ]
             });
             return false;
@@ -537,7 +540,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `Queued [${queue.meta.title}](${queue.meta.url}) [<@${queue.member.id}>]`
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -552,7 +555,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `${this.config.nickname}幫你跳過了！！！`
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -567,7 +570,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: "咻———"
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -582,7 +585,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: "砸襪魯抖——！！"
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -597,7 +600,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: "繼續嗨起來吧——"
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -621,7 +624,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: loopModeMessages[mode]
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -650,7 +653,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: queue
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -665,7 +668,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `耶！！${this.config.nickname}要掛著偷懶懶（翻滾`
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -682,7 +685,7 @@ export class SayuBot extends EventEmitter {
                 embeds: [
                     this.getExtendedEmbed({
                         description: `${this.config.nickname}辦不到..OHQ`
-                    })
+                    }, interaction.guild)
                 ]
             });
             return;
@@ -694,7 +697,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `好耶！！${this.config.nickname}決定把這首歌丟掉——`
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -711,7 +714,7 @@ export class SayuBot extends EventEmitter {
                 embeds: [
                     this.getExtendedEmbed({
                         description: `${this.config.nickname}辦不到..OHQ`
-                    })
+                    }, interaction.guild)
                 ]
             });
             return;
@@ -723,7 +726,7 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `${this.config.nickname}要出發滾到那首歌去啦——`
-                })
+                }, interaction.guild)
             ]
         });
     }
@@ -761,13 +764,14 @@ export class SayuBot extends EventEmitter {
         });
     }
 
-    public getThemeColor(): number {
-        return 0xd8993b;
+    public getThemeColor(guild: Guild | null = null): number {
+        if(!guild) return 0xd8993b;
+        return this.getGuildManager(guild)?.getMainColor() ?? 0xd8993b;
     }
 
-    public getEmbedBase(): MessageEmbedOptions {
+    public getEmbedBase(guild: Guild | null = null): MessageEmbedOptions {
         return {
-            color: this.getThemeColor(),
+            color: this.getThemeColor(guild),
             author: {
                 name: this.api.user?.username,
                 icon_url: this.api.user?.avatarURL() ?? undefined
@@ -775,9 +779,9 @@ export class SayuBot extends EventEmitter {
         };
     }
 
-    public getExtendedEmbed(embed: MessageEmbedOptions): MessageEmbedOptions {
+    public getExtendedEmbed(embed: MessageEmbedOptions, guild: Guild | null = null): MessageEmbedOptions {
         return {
-            ...this.getEmbedBase(),
+            ...this.getEmbedBase(guild),
             ...embed
         };
     }

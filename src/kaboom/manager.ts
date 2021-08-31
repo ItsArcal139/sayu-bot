@@ -111,7 +111,7 @@ export class KaboomManager {
                 iconURL: interaction.user.avatarURL() ?? undefined
             },
             timestamp: new Date()
-        });
+        }, interaction.guild);
 
         let alreadyChecked = m.roles.cache.map(r => r.id).indexOf(this.config.activeRole) != -1;
         if(alreadyChecked) {
@@ -148,7 +148,7 @@ export class KaboomManager {
                                 name: interaction.user.tag,
                                 iconURL: interaction.user.avatarURL() ?? undefined
                             }
-                        });
+                        }, interaction.guild);
                         this.provider.sendToChannel(c, { embeds: [ e2 ]});
                     }
                 });
@@ -409,7 +409,7 @@ export class KaboomManager {
                 inline: false
             });
 
-            embed = this.bot.getExtendedEmbed(embed);
+            embed = this.bot.getExtendedEmbed(embed, this.guild);
             
             this.provider.sendToMember(m, { embeds: [ embed ] }).finally(() => {
                 this.provider.kickMember(m, isForceKick ? "潛水檢查時被手動標記為潛水，已自動踢除。" : "潛水檢查時沒有最低要求身分組，已自動踢除。");
