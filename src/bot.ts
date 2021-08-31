@@ -87,7 +87,7 @@ export class SayuBot extends EventEmitter {
             if(interaction.isCommand()) {
                 try {
                     await this.handleCommandInteraction(interaction);
-                } catch(ex) {
+                } catch(ex: any) {
                     interaction.reply({
                         embeds: [
                             this.getExtendedEmbed({
@@ -325,7 +325,7 @@ export class SayuBot extends EventEmitter {
                 try {
                     const target = eval("SayuBot.instance" + obj);
                     Logger.info(util.inspect(target, false, depth, true));
-                } catch(ex) {
+                } catch(ex: any) {
                     Logger.error("Failed to dump");
                     Logger.error(ex.toString());
                 }
