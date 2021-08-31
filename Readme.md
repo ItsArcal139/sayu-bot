@@ -1,4 +1,4 @@
-# ![早柚機器人](./docs/banner.png)
+# ![Bot Banner](./docs/banner.png)
 > 對不起，米哈游和 Google。拜託不要吉我。 `—— @ItsArcal139`
 ---
 
