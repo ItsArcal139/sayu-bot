@@ -56,6 +56,7 @@ export class KaboomManager {
 
     private async handleMessage(msg: Message) {
         if(!this.config.enabled) return;
+        if(msg.guild?.id != this.guild.id) return;
         if(msg.author.id == this.bot.api.user?.id) return;
         if(msg.channel instanceof DMChannel) return;
         if(!(msg.channel instanceof TextChannel) && !(msg.channel instanceof NewsChannel)) return;
