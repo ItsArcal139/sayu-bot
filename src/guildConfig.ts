@@ -1,4 +1,4 @@
-import { GuildChannel, TextChannel } from 'discord.js';
+import { Guild, GuildChannel, TextChannel } from 'discord.js';
 import * as fs from 'fs';
 import { Logger } from './utils/logger';
 
@@ -46,10 +46,14 @@ export class BotGuildConfig {
         }
     };
     public data: BotGuildConfigData = { ...BotGuildConfig.DEFAULT };
-    public id: string;
+    public guild: Guild;
+    
+    public get id() {
+        return this.guild.id;
+    }
 
-    constructor(guildId: string) {
-        this.id = guildId;
+    constructor(guild: Guild) {
+        this.guild = guild;
         this.load();
     }
 
@@ -70,7 +74,7 @@ export class BotGuildConfig {
 
         this.data = {
             ...BotGuildConfig.DEFAULT,
-            ...JSON.parse(fs.readFileSync(GUILD_DIR_NAME + "/" + this.id + "/" + CONFIG_FILE_NAME).toString())
+            ...JSON.parse(fs.readFileSync(GUILD_DIR_NAME + "/" + this.id + "/" + CONFIG_FILE_NAME).toString().replace(/\/\/.*?\n/g, "\n").replace(/\/\/.*/, ""))
         };
         
         this.upgrade();
@@ -85,6 +89,8 @@ export class BotGuildConfig {
     }
 
     public save() {
-        fs.writeFileSync(GUILD_DIR_NAME + "/" + this.id + "/" + CONFIG_FILE_NAME, JSON.stringify(this.data, null, 4));
+        let content = JSON.stringify(this.data, null, 4);
+        content = `// Guild: ${this.guild.name}\n// ID: #${this.id}\n\n` + content;
+        fs.writeFileSync(GUILD_DIR_NAME + "/" + this.id + "/" + CONFIG_FILE_NAME, content);
     }
 }

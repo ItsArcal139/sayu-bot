@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "token": "<token>",
     "nickname": "早柚",
     "commandName": "sayu",
@@ -6,5 +7,9 @@
     "activity": {
         "name": "大家睡覺..zzZ",
         "type": "WATCHING"
+    },
+    "repository": {
+        "provider": "GitHub",
+        "url": "https://github.com/ItsArcal139/sayu-bot"
     }
 }

@@ -9,6 +9,7 @@ type BotConfigData = typeof BotConfig.DEFAULT & {
 
 export class BotConfig {
     public static readonly DEFAULT = {
+        version: 1,
         token: "<insert token here>",
         nickname: "早柚",
         commandName: "sayu",
@@ -16,6 +17,10 @@ export class BotConfig {
         activity: {
             name: "大家睡覺...zzZ",
             type: "WATCHING" as "LISTENING" | "PLAYING" | "STREAMING" | "WATCHING" | "CUSTOM" | "COMPETING" | undefined
+        },
+        repository: {
+            provider: "GitHub",
+            url: "https://github.com/ItsArcal139/sayu-bot"
         }
     };
 
@@ -31,6 +36,12 @@ export class BotConfig {
 
     public get commandName() {
         return this.data.commandName ?? BotConfig.DEFAULT.commandName;
+    }
+
+    public get repository() {
+        return {
+            ...this.data.repository ?? BotConfig.DEFAULT.repository
+        };
     }
 
     public load() {
