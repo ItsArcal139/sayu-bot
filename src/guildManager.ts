@@ -19,7 +19,7 @@ export class SayuGuildManager {
         this.bot = bot;
         this.guild = guild;
         this.rootPath = "guilds/" + guild.id + "/";
-        this.config = new BotGuildConfig(guild.id);
+        this.config = new BotGuildConfig(guild);
 
         this.kaboom = new KaboomManager(this);
         this.player = new PlayerManager(this);

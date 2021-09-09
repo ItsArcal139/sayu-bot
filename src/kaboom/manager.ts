@@ -41,17 +41,23 @@ export class KaboomManager {
 
         (async () => {
             const g = this.guild;
-            Logger.info("Fetching the guild members...");
-            Logger.info(`The guild has ${g?.memberCount ?? 0} member(s)`);
+            const name = `Kaboom@#${g.id}`;
+            Logger.info("Fetching the guild members...", name);
+            Logger.info(`The guild has ${g?.memberCount ?? 0} member(s)`, name);
             try {
                 await g?.members.fetch();
-                Logger.info("Cached the guild members.");
+                Logger.info("Cached the guild members.", name);
             } catch(_) {
-                Logger.warn("Failed to fetch the guild members!!");
+                Logger.warn("Failed to fetch the guild members!!", name);
             }
         })();
 
         this.bot.api.on("messageCreate", this.messageHandler);
+
+        let schedule = this.config.activeSchedule;
+        if(schedule) {
+            this.internalSchedule(schedule);
+        }
     }
 
     private async handleMessage(msg: Message) {

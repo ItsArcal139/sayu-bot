@@ -14,6 +14,7 @@ export class PlayerManager extends EventEmitter {
     private skipped = false;
     private jumpTarget = -1;
     private isPlaying = false;
+    private isUserStopped = false;
 
     constructor(manager: SayuGuildManager) {
         super();
@@ -128,7 +129,12 @@ export class PlayerManager extends EventEmitter {
         await vc.waitForEnded();
         this.removeLastPlayingMessage();
         this.isPlaying = false;
-        this.playNextIfNotPlaying();
+        
+        if(this.isUserStopped) {
+            this.isUserStopped = false;
+        } else {
+            this.playNextIfNotPlaying();
+        }
     }
 
     private playNextIfNotPlaying() {
@@ -210,6 +216,11 @@ export class PlayerManager extends EventEmitter {
         this.loopMode = LoopMode.none;
         this.voiceController.forceStop();
         this.removeLastPlayingMessage();
+    }
+
+    public stop() {
+        this.isUserStopped = true;
+        this.voiceController.forceStop();
     }
 
     public reset() {

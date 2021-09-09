@@ -51,6 +51,10 @@ export class SayuBot extends EventEmitter {
             await this.registerSlashCommands();
         });
 
+        this.api.on("error", err => {
+            Logger.error(err.stack ?? err.toString());
+        });
+
         this.api.on("messageCreate", (msg: Message) => {
             if(msg.channel instanceof DMChannel && msg.author.id != this.api.user?.id) {
                 Logger.info(msg.author.tag + ": " + msg.content);
@@ -58,14 +62,19 @@ export class SayuBot extends EventEmitter {
         })
 
         this.api.on("guildCreate", g => {
+            Logger.info(`GuildCreate: from guild ${g.name} (#${g.id})`);
+
             this.guildManagers.push(new SayuGuildManager(this, g));
             this.registerGuildSlashCommands(g);
         });
 
         this.api.on("guildDelete", g => {
+            Logger.info(`GuildDelete: from guild ${g.name} (#${g.id})`);
+
             let i = this.guildManagers.findIndex(m => {
                 return m.guild.id == g.id;
             });
+
             if(i >= 0) {
                 let m = this.guildManagers[i];
                 m.dispose();
@@ -201,6 +210,16 @@ export class SayuBot extends EventEmitter {
                         type: "SUB_COMMAND"
                     },
                     {
+                        name: "join",
+                        description: `${nickName}要進去掛機！！`,
+                        type: "SUB_COMMAND"
+                    },
+                    {
+                        name: "stop",
+                        description: `${nickName}要卡歌！！`,
+                        type: "SUB_COMMAND"
+                    },
+                    {
                         name: "remove",
                         description: `${nickName}不想放這首歌（怒`,
                         type: "SUB_COMMAND",
@@ -230,6 +249,11 @@ export class SayuBot extends EventEmitter {
                                 required: true
                             }
                         ]
+                    },
+                    {
+                        name: "source",
+                        description: `想...看看${nickName}的裡面...`,
+                        type: "SUB_COMMAND"
                     }
                 ]
             }
@@ -405,6 +429,21 @@ export class SayuBot extends EventEmitter {
                 await this.executeRemove(interaction);
                 return;
             }
+
+            if(sub == "join") {
+                await this.executeJoin(interaction);
+                return;
+            }
+
+            if(sub == "stop") {
+                await this.executeStop(interaction);
+                return;
+            }
+
+            if(sub == "source") {
+                await this.executeSource(interaction);
+                return;
+            }
         }
     }
 
@@ -421,6 +460,16 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: `${this.config.nickname}覺得不能幫你做這種事...zzZ`
+                }, interaction.guild)
+            ]
+        });
+    }
+
+    public async executeSource(interaction: CommandInteraction) {
+        interaction.reply({
+            embeds: [
+                this.getExtendedEmbed({
+                    description: `來看看${this.config.nickname}的[裡面](${this.config.repository.url})吧...<3`
                 }, interaction.guild)
             ]
         });
@@ -491,7 +540,7 @@ export class SayuBot extends EventEmitter {
         });
     }
 
-    private async playerCommandCheckPermission(interaction: CommandInteraction) {
+    private async playerCommandCheckPermission(interaction: CommandInteraction, botChannelRequired: boolean = true) {
         const guildManager = this.getGuildManager(interaction.guild!!)!!;
         const member = interaction.member!! as GuildMember;
         const channel = member.voice.channel;
@@ -507,6 +556,17 @@ export class SayuBot extends EventEmitter {
         }
 
         const botMember = guildManager.guild.members.cache.get(this.api.user!!.id)!!;
+        if(botChannelRequired && !botMember.voice.channel) {
+            interaction.reply({
+                embeds: [
+                    this.getExtendedEmbed({
+                        description: `${this.config.nickname}不在工作，所以只想睡覺（躺`
+                    }, interaction.guild)
+                ]
+            });
+            return false;
+        }
+
         if(botMember.voice.channel && botMember.voice.channel.id != channel.id) {
             interaction.editReply({
                 embeds: [
@@ -522,7 +582,7 @@ export class SayuBot extends EventEmitter {
     }
 
     public async executePlay(interaction: CommandInteraction) {
-        if(!this.playerCommandCheckPermission(interaction)) return;
+        if(!this.playerCommandCheckPermission(interaction, false)) return;
 
         const guildManager = this.getGuildManager(interaction.guild!!)!!;
         const voiceController = guildManager.voiceController;
@@ -560,6 +620,21 @@ export class SayuBot extends EventEmitter {
         });
     }
 
+    public async executeStop(interaction: CommandInteraction) {
+        if(!this.playerCommandCheckPermission(interaction)) return;
+
+        const guildManager = this.getGuildManager(interaction.guild!!)!!;
+        guildManager.player.stop();
+
+        interaction.reply({
+            embeds: [
+                this.getExtendedEmbed({
+                    description: `${this.config.nickname}聽說要卡歌！！！`
+                }, interaction.guild)
+            ]
+        });
+    }
+
     public async executeLeave(interaction: CommandInteraction) {
         if(!this.playerCommandCheckPermission(interaction)) return;
 
@@ -570,6 +645,23 @@ export class SayuBot extends EventEmitter {
             embeds: [
                 this.getExtendedEmbed({
                     description: "咻———"
+                }, interaction.guild)
+            ]
+        });
+    }
+
+    public async executeJoin(interaction: CommandInteraction) {
+        if(!this.playerCommandCheckPermission(interaction, false)) return;
+
+        const guildManager = this.getGuildManager(interaction.guild!!)!!;
+        const member = interaction.member!! as GuildMember;
+        const channel = member.voice.channel!!;
+        guildManager.voiceController.joinChannel(channel);
+
+        interaction.reply({
+            embeds: [
+                this.getExtendedEmbed({
+                    description: "耶——偷懶懶（躺"
                 }, interaction.guild)
             ]
         });
